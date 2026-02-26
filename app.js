@@ -1,5 +1,7 @@
 // app.js - Hauptlogik, Navigation, Event-Handling
 
+const APP_VERSION = '1.6';
+
 // ── Dropdown-Konfiguration ──
 const CONFIG = {
   typ: ['Flach-HK profiliert', 'Flach-HK glatt', 'Glieder', 'Konvektor', 'Bad'],
@@ -16,6 +18,7 @@ let currentProjektId = null;
 let currentHkId = null;
 let formPhotos = [null, null, null];
 let settingsReady = false;
+let gebaeudeDaten = { gebaeude: [], geschoss: [], raum: [] };
 
 // ── Navigation ──
 
@@ -106,6 +109,7 @@ async function openProjekt(id) {
   currentProjektId = id;
   const p = await getProjekt(id);
   document.getElementById('header-projekt-name').textContent = p.name;
+  loadGebaeudedaten();
   await renderHkList();
   navigate('screen-hk-list');
 }
@@ -366,6 +370,63 @@ function removePhoto(index) {
   renderPhotoSlots();
 }
 
+// ── Gebäudedaten-Import ──
+
+function importGebaeudedaten(file) {
+  if (!file || !currentProjektId) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const wb = XLSX.read(e.target.result, { type: 'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
+    const gebaeude = new Set();
+    const geschoss = new Set();
+    const raum = new Set();
+
+    // Ab Zeile 1 (Index 1) = Header übersprungen
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      if (row[0] != null && String(row[0]).trim()) gebaeude.add(String(row[0]).trim());
+      if (row[2] != null && String(row[2]).trim()) geschoss.add(String(row[2]).trim());
+      if (row[4] != null && String(row[4]).trim()) raum.add(String(row[4]).trim());
+    }
+
+    gebaeudeDaten = {
+      gebaeude: [...gebaeude],
+      geschoss: [...geschoss],
+      raum: [...raum]
+    };
+
+    localStorage.setItem('gebaeudedaten-' + currentProjektId, JSON.stringify(gebaeudeDaten));
+    renderDatalists();
+    showToast(`${gebaeudeDaten.gebaeude.length} Gebäude, ${gebaeudeDaten.geschoss.length} Etagen, ${gebaeudeDaten.raum.length} Räume importiert`);
+  };
+  reader.readAsArrayBuffer(file);
+  // Reset file input so same file can be re-imported
+  document.getElementById('file-gebaeudedaten').value = '';
+}
+
+function loadGebaeudedaten() {
+  if (!currentProjektId) return;
+  const stored = localStorage.getItem('gebaeudedaten-' + currentProjektId);
+  if (stored) {
+    gebaeudeDaten = JSON.parse(stored);
+  } else {
+    gebaeudeDaten = { gebaeude: [], geschoss: [], raum: [] };
+  }
+  renderDatalists();
+}
+
+function renderDatalists() {
+  const dlGeb = document.getElementById('dl-gebaeude');
+  const dlGes = document.getElementById('dl-geschoss');
+  const dlRaum = document.getElementById('dl-raumnr');
+  dlGeb.innerHTML = gebaeudeDaten.gebaeude.map(v => `<option value="${esc(v)}">`).join('');
+  dlGes.innerHTML = gebaeudeDaten.geschoss.map(v => `<option value="${esc(v)}">`).join('');
+  dlRaum.innerHTML = gebaeudeDaten.raum.map(v => `<option value="${esc(v)}">`).join('');
+}
+
 // ── Export ──
 
 async function exportData(format) {
@@ -484,6 +545,7 @@ function initSettingsSliders() {
 document.addEventListener('DOMContentLoaded', async () => {
   loadSettings();
   initSettingsSliders();
+  document.getElementById('header-version').textContent = APP_VERSION;
 
   await openDB();
   populateDropdowns();
@@ -516,12 +578,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ── Service Worker Registrierung + Update-Erkennung ──
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').then(reg => {
-    // Prüfe regelmäßig auf Updates
+    // Bei jedem App-Start sofort auf Updates prüfen
+    reg.update().catch(() => {});
+
+    // Wenn bereits ein wartender SW da ist -> Banner sofort zeigen
+    if (reg.waiting) showUpdateBanner();
+
     reg.addEventListener('updatefound', () => {
       const newWorker = reg.installing;
       newWorker.addEventListener('statechange', () => {
         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-          // Neuer SW bereit, alter noch aktiv -> Update-Banner zeigen
           showUpdateBanner();
         }
       });
