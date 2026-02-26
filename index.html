@@ -17,8 +17,10 @@
 <!-- ════════ HEADER ════════ -->
 <div class="header" id="header">
   <button class="btn-back" id="btn-back" onclick="history.back()" style="display:none">&#8592;</button>
-  <h1 id="header-title">HK-Aufnahme</h1>
-  <span id="header-version" class="header-version"></span>
+  <div class="header-text" id="header-title">
+    <span class="header-main">Heizkörper-Erfassung <span id="header-version"></span></span>
+    <span class="header-sub" id="header-timestamp"></span>
+  </div>
   <button class="btn-settings" id="btn-settings" onclick="openSettings()" title="Einstellungen">&#9881;</button>
 </div>
 
@@ -238,11 +240,13 @@
 <script>
   // Header-Navigation steuern
   const screens = {
-    'screen-projekte': { title: 'HK-Aufnahme', back: false },
+    'screen-projekte': { title: 'Heizkörper-Erfassung', back: false },
     'screen-hk-list': { title: null, back: true },
     'screen-form': { title: null, back: true },
     'screen-settings': { title: 'Einstellungen', back: true }
   };
+
+  const defaultHeaderHTML = document.getElementById('header-title').innerHTML;
 
   const origNavigate = navigate;
   navigate = function(screen, pushState) {
@@ -251,12 +255,14 @@
     const btnBack = document.getElementById('btn-back');
     const headerTitle = document.getElementById('header-title');
     btnBack.style.display = cfg.back ? 'flex' : 'none';
-    if (screen === 'screen-hk-list') {
+    if (screen === 'screen-projekte') {
+      headerTitle.innerHTML = defaultHeaderHTML;
+    } else if (screen === 'screen-hk-list') {
       headerTitle.textContent = document.getElementById('header-projekt-name').textContent;
     } else if (screen === 'screen-form') {
       headerTitle.textContent = document.getElementById('header-form-title').textContent;
     } else {
-      headerTitle.textContent = cfg.title || 'HK-Aufnahme';
+      headerTitle.textContent = cfg.title || 'Heizkörper-Erfassung';
     }
   };
 </script>

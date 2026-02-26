@@ -1,6 +1,7 @@
 // app.js - Hauptlogik, Navigation, Event-Handling
 
 const APP_VERSION = '1.6';
+const APP_BUILD_DATE = '2026-02-26';
 
 // ── Dropdown-Konfiguration ──
 const CONFIG = {
@@ -546,6 +547,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadSettings();
   initSettingsSliders();
   document.getElementById('header-version').textContent = APP_VERSION;
+  document.getElementById('header-timestamp').textContent = 'letzte Änderung: ' + APP_BUILD_DATE;
 
   await openDB();
   populateDropdowns();
