@@ -18,6 +18,7 @@
 <div class="header" id="header">
   <button class="btn-back" id="btn-back" onclick="history.back()" style="display:none">&#8592;</button>
   <h1 id="header-title">HK-Aufnahme</h1>
+  <button class="btn-settings" id="btn-settings" onclick="openSettings()" title="Einstellungen">&#9881;</button>
 </div>
 
 <!-- ════════ SCREEN: Projektliste ════════ -->
@@ -128,6 +129,17 @@
     </div>
   </div>
 
+  <div class="form-row" style="margin-top:14px">
+    <div class="form-group">
+      <label>Entlüftung</label>
+      <div class="toggle-group">
+        <button type="button" class="toggle-btn" data-toggle="f-entlueftung" data-value="true" onclick="handleToggle('f-entlueftung', true)">Ja</button>
+        <button type="button" class="toggle-btn active" data-toggle="f-entlueftung" data-value="false" onclick="handleToggle('f-entlueftung', false)">Nein</button>
+      </div>
+    </div>
+    <div class="form-group"></div>
+  </div>
+
   <!-- Einbau -->
   <div class="section-title">Einbau / Sonstiges</div>
   <div class="form-group">
@@ -162,6 +174,37 @@
   </div>
 </div>
 
+<!-- ════════ SCREEN: Einstellungen ════════ -->
+<div class="screen" id="screen-settings">
+  <h2 style="margin-bottom:16px">Einstellungen</h2>
+
+  <div class="settings-group">
+    <label for="set-erfasser">Erfasser-Name (Pflichtfeld)</label>
+    <input type="text" id="set-erfasser" placeholder="Vor- und Nachname" autocomplete="name">
+  </div>
+
+  <div class="settings-group">
+    <label for="set-fontsize">Schriftgröße</label>
+    <div class="settings-range-row">
+      <input type="range" id="set-fontsize" min="10" max="18" step="1" value="13">
+      <span class="range-value" id="val-fontsize">13px</span>
+    </div>
+  </div>
+
+  <div class="settings-group">
+    <label for="set-fieldpadding">Feldgröße (Padding)</label>
+    <div class="settings-range-row">
+      <input type="range" id="set-fieldpadding" min="4" max="16" step="1" value="10">
+      <span class="range-value" id="val-fieldpadding">10px</span>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button class="btn btn-primary" onclick="saveSettings()">Speichern</button>
+    <button class="btn btn-outline" id="btn-settings-cancel" onclick="history.back()">Abbrechen</button>
+  </div>
+</div>
+
 <!-- ════════ Modal: Neues Projekt ════════ -->
 <div class="modal-overlay" id="modal-new-projekt" style="display:none" onclick="if(event.target===this)closeNewProjektDialog()">
   <div class="modal">
@@ -189,7 +232,8 @@
   const screens = {
     'screen-projekte': { title: 'HK-Aufnahme', back: false },
     'screen-hk-list': { title: null, back: true },
-    'screen-form': { title: null, back: true }
+    'screen-form': { title: null, back: true },
+    'screen-settings': { title: 'Einstellungen', back: true }
   };
 
   const origNavigate = navigate;

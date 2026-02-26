@@ -93,8 +93,10 @@ function newHeizkoerper(projektId, defaults) {
     ventilform: '',
     hahnblock: false,
     rlVerschraubung: false,
+    entlueftung: false,
     einbausituation: '',
     bemerkung: '',
+    erfasser: '',
     fotos: []
   };
 }

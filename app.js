@@ -15,6 +15,7 @@ const CONFIG = {
 let currentProjektId = null;
 let currentHkId = null;
 let formPhotos = [null, null, null];
+let settingsReady = false;
 
 // ── Navigation ──
 
@@ -64,9 +65,14 @@ async function renderProjekte() {
     const hks = await getHeizkoerperByProjekt(p.id);
     const datum = new Date(p.erstelltAm).toLocaleDateString('de-DE');
     html += `
-      <div class="card" data-id="${p.id}" onclick="openProjekt('${p.id}')">
-        <div class="card-title">${esc(p.name)}</div>
-        <div class="card-sub">${datum} &middot; ${hks.length} HK</div>
+      <div class="card" data-id="${p.id}">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="flex:1;cursor:pointer" onclick="openProjekt('${p.id}')">
+            <div class="card-title">${esc(p.name)}</div>
+            <div class="card-sub">${datum} &middot; ${hks.length} HK</div>
+          </div>
+          <button class="btn-icon btn-icon-danger" onclick="event.stopPropagation();confirmDeleteProjekt('${p.id}')" title="Löschen">&#128465;</button>
+        </div>
       </div>`;
   }
   list.innerHTML = html;
@@ -93,6 +99,10 @@ async function createNewProjekt() {
 }
 
 async function openProjekt(id) {
+  if (!localStorage.getItem('erfasser-name')) {
+    openSettings();
+    return;
+  }
   currentProjektId = id;
   const p = await getProjekt(id);
   document.getElementById('header-projekt-name').textContent = p.name;
@@ -149,12 +159,17 @@ async function renderHkList() {
   for (const hk of hks) {
     const info = [hk.gebaeude, hk.geschoss, `R${hk.raumnr}`].filter(Boolean).join(' / ');
     html += `
-      <div class="card" onclick="openHkForm('${hk.id}')">
+      <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center">
-          <div class="card-title">HK ${esc(String(hk.hkNr || '-'))}</div>
-          ${hk.typ ? `<span class="badge">${esc(hk.typ)}</span>` : ''}
+          <div style="flex:1;cursor:pointer" onclick="openHkForm('${hk.id}')">
+            <div class="card-title">HK ${esc(String(hk.hkNr || '-'))} ${hk.typ ? `<span class="badge">${esc(hk.typ)}</span>` : ''}</div>
+            <div class="card-sub">${esc(info)}${hk.raumbezeichnung ? ' &middot; ' + esc(hk.raumbezeichnung) : ''}</div>
+          </div>
+          <div class="card-actions">
+            <button class="btn-icon" onclick="openHkForm('${hk.id}')" title="Bearbeiten">&#9998;</button>
+            <button class="btn-icon btn-icon-danger" onclick="confirmDeleteHk('${hk.id}')" title="Löschen">&#128465;</button>
+          </div>
         </div>
-        <div class="card-sub">${esc(info)}${hk.raumbezeichnung ? ' &middot; ' + esc(hk.raumbezeichnung) : ''}</div>
       </div>`;
   }
   list.innerHTML = html;
@@ -209,6 +224,7 @@ function fillForm(hk) {
 
   setToggle('f-hahnblock', hk.hahnblock);
   setToggle('f-rlVerschraubung', hk.rlVerschraubung);
+  setToggle('f-entlueftung', hk.entlueftung);
 
   // Art-Dropdown Sichtbarkeit
   updateArtVisibility();
@@ -263,9 +279,11 @@ async function saveForm() {
   hk.ventilform = document.getElementById('f-ventilform').value;
   hk.hahnblock = getToggleValue('f-hahnblock');
   hk.rlVerschraubung = getToggleValue('f-rlVerschraubung');
+  hk.entlueftung = getToggleValue('f-entlueftung');
   hk.einbausituation = document.getElementById('f-einbausituation').value;
   hk.bemerkung = document.getElementById('f-bemerkung').value.trim();
   hk.fotos = formPhotos.filter(Boolean);
+  hk.erfasser = localStorage.getItem('erfasser-name') || '';
 
   await saveHeizkoerper(hk);
   await renderHkList();
@@ -279,6 +297,15 @@ async function deleteCurrentHk() {
     await deleteHeizkoerper(currentHkId);
     await renderHkList();
     navigate('screen-hk-list');
+    showToast('Heizkörper gelöscht');
+  }
+}
+
+async function confirmDeleteHk(id) {
+  const hk = await getHeizkoerper(id);
+  if (confirm(`HK ${hk.hkNr || '-'} (${hk.geschoss || ''} / R${hk.raumnr || ''}) wirklich löschen?`)) {
+    await deleteHeizkoerper(id);
+    await renderHkList();
     showToast('Heizkörper gelöscht');
   }
 }
@@ -388,9 +415,76 @@ function esc(str) {
   return div.innerHTML;
 }
 
+// ── Einstellungen ──
+
+function loadSettings() {
+  const fontSize = localStorage.getItem('ui-font-size') || '13';
+  const fieldPadding = localStorage.getItem('ui-field-padding') || '10';
+  const erfasser = localStorage.getItem('erfasser-name') || '';
+
+  document.documentElement.style.setProperty('--ui-font-size', fontSize + 'px');
+  document.documentElement.style.setProperty('--ui-field-padding', fieldPadding + 'px');
+
+  settingsReady = !!erfasser;
+  return { fontSize, fieldPadding, erfasser };
+}
+
+function openSettings() {
+  const s = loadSettings();
+  document.getElementById('set-erfasser').value = s.erfasser;
+  document.getElementById('set-fontsize').value = s.fontSize;
+  document.getElementById('val-fontsize').textContent = s.fontSize + 'px';
+  document.getElementById('set-fieldpadding').value = s.fieldPadding;
+  document.getElementById('val-fieldpadding').textContent = s.fieldPadding + 'px';
+
+  // Abbrechen-Button ausblenden wenn Erfasser noch nicht gesetzt (Pflicht)
+  document.getElementById('btn-settings-cancel').style.display = settingsReady ? '' : 'none';
+
+  navigate('screen-settings');
+}
+
+function saveSettings() {
+  const erfasser = document.getElementById('set-erfasser').value.trim();
+  if (!erfasser) {
+    showToast('Bitte Erfasser-Name eingeben');
+    document.getElementById('set-erfasser').focus();
+    return;
+  }
+  const fontSize = document.getElementById('set-fontsize').value;
+  const fieldPadding = document.getElementById('set-fieldpadding').value;
+
+  localStorage.setItem('erfasser-name', erfasser);
+  localStorage.setItem('ui-font-size', fontSize);
+  localStorage.setItem('ui-field-padding', fieldPadding);
+
+  loadSettings();
+  navigate('screen-projekte');
+  showToast('Einstellungen gespeichert');
+}
+
+function initSettingsSliders() {
+  const fontSlider = document.getElementById('set-fontsize');
+  const paddingSlider = document.getElementById('set-fieldpadding');
+
+  fontSlider.addEventListener('input', () => {
+    const v = fontSlider.value;
+    document.getElementById('val-fontsize').textContent = v + 'px';
+    document.documentElement.style.setProperty('--ui-font-size', v + 'px');
+  });
+
+  paddingSlider.addEventListener('input', () => {
+    const v = paddingSlider.value;
+    document.getElementById('val-fieldpadding').textContent = v + 'px';
+    document.documentElement.style.setProperty('--ui-field-padding', v + 'px');
+  });
+}
+
 // ── Init ──
 
 document.addEventListener('DOMContentLoaded', async () => {
+  loadSettings();
+  initSettingsSliders();
+
   await openDB();
   populateDropdowns();
   await renderProjekte();
@@ -405,6 +499,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('input-projekt-name').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') createNewProjekt();
   });
+
+  // Wenn kein Erfasser-Name gesetzt -> Settings erzwingen
+  if (!settingsReady) {
+    openSettings();
+    return;
+  }
 
   // Startseite oder Hash-Navigation
   const hash = location.hash.replace('#', '');
