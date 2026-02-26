@@ -517,3 +517,36 @@ body {
   font-weight: 600;
   font-size: .9rem;
 }
+
+/* ── Update Banner ── */
+#update-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #333;
+  color: #fff;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: .9rem;
+  z-index: 400;
+  box-shadow: 0 -2px 8px rgba(0,0,0,.3);
+}
+
+#update-banner button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius);
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+#update-banner button:first-of-type {
+  background: var(--accent);
+  color: #fff;
+  margin-left: auto;
+}

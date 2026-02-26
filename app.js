@@ -513,7 +513,44 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// ── Service Worker Registrierung ──
+// ── Service Worker Registrierung + Update-Erkennung ──
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    // Prüfe regelmäßig auf Updates
+    reg.addEventListener('updatefound', () => {
+      const newWorker = reg.installing;
+      newWorker.addEventListener('statechange', () => {
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          // Neuer SW bereit, alter noch aktiv -> Update-Banner zeigen
+          showUpdateBanner();
+        }
+      });
+    });
+  }).catch(() => {});
+
+  // Wenn der neue SW die Kontrolle übernimmt -> Seite neu laden
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    window.location.reload();
+  });
+}
+
+function showUpdateBanner() {
+  // Verhindere doppeltes Banner
+  if (document.getElementById('update-banner')) return;
+  const banner = document.createElement('div');
+  banner.id = 'update-banner';
+  banner.innerHTML = `
+    Neue Version verfügbar!
+    <button onclick="applyUpdate()">Jetzt aktualisieren</button>
+    <button onclick="this.parentElement.remove()" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.5)">Später</button>
+  `;
+  document.body.appendChild(banner);
+}
+
+function applyUpdate() {
+  navigator.serviceWorker.getRegistration().then(reg => {
+    if (reg && reg.waiting) {
+      reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+    }
+  });
 }

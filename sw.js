@@ -1,5 +1,5 @@
 // sw.js - Service Worker für Offline-Fähigkeit
-const CACHE_NAME = 'hk-aufnahme-v4';
+const CACHE_NAME = 'hk-aufnahme-v5';
 const ASSETS = [
   './',
   './index.html',
@@ -27,6 +27,13 @@ self.addEventListener('activate', (event) => {
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
     ).then(() => self.clients.claim())
   );
+});
+
+// Skip-Waiting auf Anfrage vom Client
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // Network-first: Online immer aktuell, Offline aus Cache
