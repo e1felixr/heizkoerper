@@ -63,6 +63,38 @@ Alle Nutzerdaten bleiben lokal auf dem Gerät. Es werden keine Daten an einen Se
 
 Unter **Einstellungen > Gefahrenzone > "Alle Daten zurücksetzen"** können sämtliche Projekte, Heizkörper und importierte Gebäudedaten unwiderruflich gelöscht werden. Vor dem endgültigen Löschen erfolgt eine doppelte Sicherheitsabfrage.
 
+## Gebäudedaten importieren
+
+Über den Button **"Gebäudedaten"** in der Heizkörper-Liste können vordefinierte Vorschlagslisten für Gebäude, Etagen und Räume aus einer xlsx-Datei importiert werden. Beim Ausfüllen des Formulars erscheinen diese dann als Autovervollständigung.
+
+### Datei-Anforderungen
+
+- **Format:** `.xlsx` (Excel)
+- **Speicherort:** Die Datei muss auf dem Gerät erreichbar sein (z.B. lokaler Speicher, Downloads-Ordner, OneDrive, Google Drive). Beim Antippen des Buttons öffnet sich der Datei-Picker des Geräts.
+
+### Aufbau der xlsx-Datei
+
+Die Datei muss folgende Spaltenstruktur haben (Zeile 1 = Überschrift, wird übersprungen):
+
+| Spalte A | Spalte B | Spalte C | Spalte D | Spalte E |
+|----------|----------|----------|----------|----------|
+| **Gebäude** | *(frei)* | **Etage** | *(frei)* | **Raum** |
+| Haus 1 | | UG | | Raum 1 |
+| Haus 2 | | EG | | Raum 2 |
+| Haus Norbert | | OG 1 | | Raum 12 |
+| | | OG 2 | | |
+
+- Nur die Spalten **A**, **C** und **E** werden ausgelesen
+- Spalten B und D werden ignoriert (können leer sein oder andere Daten enthalten)
+- Leere Zellen und Duplikate werden automatisch gefiltert
+- Die Listen müssen nicht gleich lang sein (z.B. 3 Gebäude, 5 Etagen, 20 Räume)
+
+### Hinweise
+
+- Die Gebäudedaten werden **pro Projekt** gespeichert - verschiedene Projekte können unterschiedliche Gebäudedaten haben
+- Ein erneuter Import überschreibt die bisherigen Gebäudedaten des Projekts
+- Nach erfolgreichem Import erscheint ein Toast mit der Anzahl der importierten Einträge
+
 ## Features
 
 - Projekte anlegen und verwalten
