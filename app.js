@@ -1,7 +1,7 @@
 // app.js - Hauptlogik, Navigation, Event-Handling
 
 const APP_VERSION = 'v1.6';
-const APP_BUILD_DATE = '26.02.2026 10:48';
+const APP_BUILD_DATE = '26.02.2026 10:46';
 
 // ── Dropdown-Konfiguration ──
 const CONFIG = {
@@ -522,6 +522,25 @@ function saveSettings() {
   loadSettings();
   navigate('screen-projekte');
   showToast('Einstellungen gespeichert');
+}
+
+async function resetAllData() {
+  if (!confirm('ACHTUNG: Alle Projekte, Heizkörper und Gebäudedaten werden unwiderruflich gelöscht!\n\nFortfahren?')) return;
+  if (!confirm('Wirklich ALLE Daten löschen? Dies kann nicht rückgängig gemacht werden!')) return;
+
+  // IndexedDB löschen
+  const projekte = await getAllProjekte();
+  for (const p of projekte) {
+    // Gebäudedaten aus localStorage entfernen
+    localStorage.removeItem('gebaeudedaten-' + p.id);
+    await deleteProjekt(p.id);
+  }
+
+  currentProjektId = null;
+  gebaeudeDaten = { gebaeude: [], geschoss: [], raum: [] };
+  await renderProjekte();
+  navigate('screen-projekte');
+  showToast('Alle Daten gelöscht');
 }
 
 function initSettingsSliders() {

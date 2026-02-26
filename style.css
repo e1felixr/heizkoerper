@@ -541,6 +541,18 @@ body {
   font-size: .9rem;
 }
 
+.settings-danger-zone {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.settings-danger-zone .hint {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--text-sec);
+}
+
 /* ── Update Banner ── */
 #update-banner {
   position: fixed;
