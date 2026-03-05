@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd:*)",
+      "Bash(curl:*)",
+      "Bash(gh repo:*)",
+      "Bash(cd \"/c/Users/Felix.Rundel/OneDrive - E1 Energiemanagement GmbH/2 Buero/6 GPT_Python/260225_HK-Aufnahme\" && node -e \"\nconst XLSX = require\\('./lib/xlsx.mini.min.js'\\);\nconst wb = XLSX.readFile\\('gebäudedaten.xlsx'\\);\nconsole.log\\('Sheets:', wb.SheetNames\\);\nfor \\(const name of wb.SheetNames\\) {\n  const ws = wb.Sheets[name];\n  const data = XLSX.utils.sheet_to_json\\(ws, { header: 1 }\\);\n  console.log\\('\\\\n=== Sheet:', name, '==='\\);\n  // Show first 15 rows\n  data.slice\\(0, 15\\).forEach\\(\\(row, i\\) => console.log\\(i, JSON.stringify\\(row\\)\\)\\);\n  console.log\\('... total rows:', data.length\\);\n}\n\" 2>&1)",
+      "Bash(cd \"/c/Users/Felix.Rundel/OneDrive - E1 Energiemanagement GmbH/2 Buero/6 GPT_Python/260225_HK-Aufnahme\" && node -e \"\nconst XLSX = require\\('xlsx'\\);\nconst wb = XLSX.readFile\\('gebäudedaten.xlsx'\\);\nconsole.log\\('Sheets:', wb.SheetNames\\);\nfor \\(const name of wb.SheetNames\\) {\n  const ws = wb.Sheets[name];\n  const data = XLSX.utils.sheet_to_json\\(ws, { header: 1 }\\);\n  console.log\\('\\\\n=== Sheet:', name, '==='\\);\n  data.slice\\(0, 20\\).forEach\\(\\(row, i\\) => console.log\\(i, JSON.stringify\\(row\\)\\)\\);\n  console.log\\('... total rows:', data.length\\);\n}\n\" 2>&1)",
+      "Bash(tail:*)",
+      "Bash(ls:*)",
+      "Bash(python:*)",
+      "Bash(rm:*)",
+      "Bash(git:*)",
+      "Bash(git add*)",
+      "Bash(git commit*)",
+      "Bash(git push*)",
+      "Bash(git status*)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(magick:*)",
+      "Bash(cmd.exe:*)",
+      "Bash(pdftotext:*)",
+      "Bash(node:*)",
+      "Bash(pip show:*)",
+      "Bash(tesseract:*)",
+      "Bash(mkdir:*)"
+    ]
+  },
+  "outputStyle": "default"
+}
