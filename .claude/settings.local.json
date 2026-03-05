@@ -26,7 +26,9 @@
       "Bash(mkdir:*)",
       "Bash(GIT_TERMINAL_PROMPT=0 git push:*)",
       "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" auth:*)",
-      "Bash(GIT_TRACE=1 git push:*)"
+      "Bash(GIT_TRACE=1 git push:*)",
+      "Bash(grep:*)",
+      "Bash(py:*)"
     ]
   },
   "outputStyle": "default"
