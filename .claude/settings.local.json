@@ -28,7 +28,9 @@
       "Bash(\"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" auth:*)",
       "Bash(GIT_TRACE=1 git push:*)",
       "Bash(grep:*)",
-      "Bash(py:*)"
+      "Bash(py:*)",
+      "Bash(where:*)",
+      "Bash(\"C:\\\\Users\\\\Felix.Rundel\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python313\\\\python.exe\":*)"
     ]
   },
   "outputStyle": "default"
